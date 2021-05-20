@@ -1,0 +1,7 @@
+- id: config-gen
+  name: avocado-config-gen
+  description: run the config generator
+  entry: config-gen
+  language: python
+  types: [json, yaml]
+  require_serial: true
