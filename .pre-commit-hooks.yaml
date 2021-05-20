@@ -3,5 +3,5 @@
   description: run the config generator
   entry: config-gen
   language: python
-  types: [json, yaml]
+  types_or: [json, yaml]
   require_serial: true
