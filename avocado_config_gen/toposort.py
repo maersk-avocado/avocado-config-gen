@@ -1,5 +1,6 @@
 from .traverse import apply_children
 
+
 def order(nodes, successors):
     visited = {*[]}
     visible = {}

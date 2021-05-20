@@ -1,9 +1,9 @@
 import argparse
-import re
+
 from ruamel.yaml import YAML
 
 from .merge import merge_all
-from .template import (template_list, template_props, template_repeat)
+from .template import template_list, template_props, template_repeat
 from .toposort import apply_toposort
 
 
@@ -39,12 +39,12 @@ def run(config, *, kont, files=None, apply=apply_single, yaml=None):
         togen = config
     else:
         fset = set(files)
-        togen = [i for i in config if i['output'] in fset or set(i['from']) & fset]
+        togen = [i for i in config if i["output"] in fset or set(i["from"]) & fset]
 
     for item in togen:
-        output = item['output']
-        components = item['components']
-        fromfiles = item['from']
+        output = item["output"]
+        components = item["components"]
+        fromfiles = item["from"]
 
         print(f"generating {output}...")
         res = apply(components, output, fromfiles, yaml=yaml)
@@ -55,16 +55,17 @@ def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", "-c", required=False, default=".template-config.yaml")
     parser.add_argument("--only", "-o", action="store_true", default=False)
-    parser.add_argument('files', nargs='*')
+    parser.add_argument("files", nargs="*")
     args = parser.parse_args(argv)
     files = args.files
     only = args.only
     if not only:
         files = files or None
-    
+
     config = load_file(args.config)
     yaml = YAML()
     run(config, files=files, kont=dump_to_yaml, yaml=yaml)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

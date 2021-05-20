@@ -1,22 +1,33 @@
 import pytest
 
-from avocado_config_gen.toposort import order, do_toposort
+from avocado_config_gen.toposort import do_toposort, order
 
 
-@pytest.mark.parametrize(("input", "exporder",  "expvisible"), [
-    ({1: [2], 2: [3], 3: []}, [1,2,3], {1: {2, 3}, 2: {3}, 3: {*[]}}),
-    ({1: [2], 2: [3], 3: [], 4: [5], 5: [2]}, [4, 5, 1, 2, 3], {1: {2, 3}, 2: {3}, 3: {*[]}, 4: {5, 2, 3}, 5: {2, 3}}),
-    ({1: [], 2: [], 3: []}, [3,2,1], {1: {*[]}, 2: {*[]}, 3: {*[]}}),
-])
+@pytest.mark.parametrize(
+    ("input", "exporder", "expvisible"),
+    [
+        ({1: [2], 2: [3], 3: []}, [1, 2, 3], {1: {2, 3}, 2: {3}, 3: {*[]}}),
+        (
+            {1: [2], 2: [3], 3: [], 4: [5], 5: [2]},
+            [4, 5, 1, 2, 3],
+            {1: {2, 3}, 2: {3}, 3: {*[]}, 4: {5, 2, 3}, 5: {2, 3}},
+        ),
+        ({1: [], 2: [], 3: []}, [3, 2, 1], {1: {*[]}, 2: {*[]}, 3: {*[]}}),
+    ],
+)
 def test_order(input, exporder, expvisible):
     res = order(input.keys(), input.get)
     assert res[0] == exporder
     assert res[1] == expvisible
 
-@pytest.mark.parametrize(("input", ), [
-    ({1: [2], 2: [1]}, ),
-    ({1: [2], 2: [3], 3: [1]},),
-])
+
+@pytest.mark.parametrize(
+    ("input",),
+    [
+        ({1: [2], 2: [1]},),
+        ({1: [2], 2: [3], 3: [1]},),
+    ],
+)
 def test_cycles(input):
     with pytest.raises(ValueError):
         order(input.keys(), input.get)

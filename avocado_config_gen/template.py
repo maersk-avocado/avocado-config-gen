@@ -2,6 +2,7 @@ import re
 
 from .traverse import apply_children
 
+
 def template_repeat(items, obj):
     def go(obj):
         if not isinstance(obj, list):
@@ -70,9 +71,7 @@ def apply_template(templ, obj):
         if isinstance(obj, str):
             return type(obj)(obj % templ)
         elif isinstance(obj, dict):
-            return type(obj)({
-                go(k): go(v) for k, v in obj.items()
-            })
+            return type(obj)({go(k): go(v) for k, v in obj.items()})
         return apply_children(obj, go)
 
     return go(obj)

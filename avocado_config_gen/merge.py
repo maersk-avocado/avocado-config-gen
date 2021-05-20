@@ -26,7 +26,11 @@ def merge(left, right):
             t = select_type(type(left), type(right), list)
             ix = min(len(left), len(right))
             return t(
-                [*[merge(l, r) for l, r in zip(left, right)], *[l for l in left[ix:]], *[r for r in right[ix:]],]
+                [
+                    *[merge(i, j) for i, j in zip(left, right)],
+                    *[i for i in left[ix:]],
+                    *[j for j in right[ix:]],
+                ]
             )
         raise TypeError()
     if left == right:
