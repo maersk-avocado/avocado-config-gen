@@ -3,8 +3,16 @@ import argparse
 from ruamel.yaml import YAML
 
 from .merge import merge_all
+from .tags import DefaultTags
 from .template import template_list, template_props, template_repeat
 from .toposort import apply_toposort
+
+
+def create_yaml():
+    yaml = YAML()
+    for cls in DefaultTags._subclasses:
+        yaml.register_class(cls)
+    return yaml
 
 
 def prepend_notice(data):
@@ -12,13 +20,13 @@ def prepend_notice(data):
 
 
 def load_file(path: str, *, yaml=None):
-    yaml = yaml or YAML()
+    yaml = yaml or create_yaml()
     with open(path) as f:
         return yaml.load(f)
 
 
 def dump_to_yaml(filename, data, *, yaml=None):
-    yaml = yaml or YAML()
+    yaml = yaml or create_yaml()
     with open(filename, "w") as f:
         yaml.dump(data, f, transform=prepend_notice)
 
@@ -63,7 +71,7 @@ def main(argv=None):
         files = files or None
 
     config = load_file(args.config)
-    yaml = YAML()
+    yaml = create_yaml()
     run(config, files=files, kont=dump_to_yaml, yaml=yaml)
 
 

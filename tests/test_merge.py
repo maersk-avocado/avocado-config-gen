@@ -1,6 +1,11 @@
 import pytest
 
-from avocado_config_gen.merge import merge
+from avocado_config_gen.merge import Mergeable, merge
+
+
+class Left(Mergeable, dict):
+    def merge(self, other):
+        return self
 
 
 @pytest.mark.parametrize(
@@ -11,7 +16,12 @@ from avocado_config_gen.merge import merge
         ({"a": 1}, {"b": 2}, {"a": 1, "b": 2}),
         ({"a": {"b": 1}}, {"a": {"c": 2}}, {"a": {"b": 1, "c": 2}}),
         ("a", "a", "a"),
+        ([], [], []),
+        ([1], [1], [1]),
         (1, 1, 1),
+        # Left is strictly invalid, but it should work if only on one side
+        (Left({"foo": "a"}), "b", Left({"foo": "a"})),
+        ("a", Left({"foo": "b"}), Left({"foo": "b"})),
     ],
 )
 def test_merge(input_a, input_b, expected):
@@ -39,6 +49,7 @@ def test_merge(input_a, input_b, expected):
                 2,
             ],
         ),
+        (Left({"foo": "bar"}), Left({"foo": "baz"})),
     ],
 )
 def test_merge_error(input_a, input_b):
