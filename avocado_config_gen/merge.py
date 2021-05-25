@@ -14,6 +14,9 @@ class Mergeable(abc.ABC):
     def merge(self, other):
         ...
 
+    def rmerge(self, other):
+        return self.merge(other)
+
 
 def select_type(left, right, other=None):
     if left is right or left == right:
@@ -36,7 +39,7 @@ def merge(left, right):
             x = x | 1
     # if isinstance(right, Mergeable) and type(left) is not type(right):
     if isinstance(right, Mergeable):
-        res = right.merge(left)
+        res = right.rmerge(left)
         if res is not NotImplemented:
             right = res
             x = x | 2
