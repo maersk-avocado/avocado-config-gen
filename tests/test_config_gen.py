@@ -42,4 +42,4 @@ def test_run(files, expected):
         kont.expect_call(data["output"], i, yaml=None).will_once(Return(None))
 
     with satisfied(kont, apply):
-        run(config, kont=kont, files=files, apply=apply)
+        run(config, kont=kont, files=files and set(files), apply=apply)
