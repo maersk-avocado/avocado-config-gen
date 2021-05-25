@@ -1,4 +1,5 @@
 import argparse
+from typing import List, Optional, Set
 
 from ruamel.yaml import YAML
 
@@ -31,7 +32,7 @@ def dump_to_yaml(filename, data, *, yaml=None):
         yaml.dump(data, f, transform=prepend_notice)
 
 
-def apply_single(components, output, files, *, loader=load_file, yaml=None):
+def apply_single(components, output: str, files: List[str], *, loader=load_file, yaml: Optional[YAML] = None):
     components = loader(components, yaml=yaml)
     data = [loader(p, yaml=yaml) for p in files]
     data = merge_all(data)
@@ -42,12 +43,19 @@ def apply_single(components, output, files, *, loader=load_file, yaml=None):
     return step4
 
 
-def run(config, *, kont, files=None, apply=apply_single, yaml=None):
-    if files is None:
+def run(
+    config,
+    *,
+    kont,
+    files: Optional[Set[str]] = None,
+    apply=apply_single,
+    yaml: Optional[YAML] = None,
+    config_changed: bool = False,
+):
+    if files is None or config_changed:
         togen = config
     else:
-        fset = set(files)
-        togen = [i for i in config if i["output"] in fset or set(i["from"]) & fset]
+        togen = [i for i in config if i["output"] in files or set(i["from"]) & files]
 
     for item in togen:
         output = item["output"]
@@ -59,20 +67,20 @@ def run(config, *, kont, files=None, apply=apply_single, yaml=None):
         kont(output, res, yaml=yaml)
 
 
-def main(argv=None):
+def main(argv: Optional[List[str]] = None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", "-c", required=False, default=".template-config.yaml")
     parser.add_argument("--only", "-o", action="store_true", default=False)
     parser.add_argument("files", nargs="*")
     args = parser.parse_args(argv)
-    files = args.files
+    files = set(args.files)
     only = args.only
     if not only:
         files = files or None
 
     config = load_file(args.config)
     yaml = create_yaml()
-    run(config, files=files, kont=dump_to_yaml, yaml=yaml)
+    run(config, files=files, kont=dump_to_yaml, yaml=yaml, config_changed=(files and args.config in files))
 
 
 if __name__ == "__main__":
