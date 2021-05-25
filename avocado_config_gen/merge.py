@@ -1,6 +1,14 @@
 import abc
 
 
+class NonCommutativeMergeError(TypeError):
+    pass
+
+
+class NonMergeableTypesError(TypeError):
+    pass
+
+
 class Mergeable(abc.ABC):
     @abc.abstractmethod
     def merge(self, other):
@@ -41,7 +49,7 @@ def merge(left, right):
         # assert that both were commutable together by asserting equal output
         if left == right:
             return left
-        raise TypeError("Merging operations are non-commutable!")
+        raise NonCommutativeMergeError("Merging operations are non-commutable!")
 
     if isinstance(left, dict):
         if isinstance(right, dict):
@@ -52,11 +60,12 @@ def merge(left, right):
                     **{k: right[k] for k in right if k not in left},
                 }
             )
-        raise TypeError()
+        raise NonMergeableTypesError(f"Cannot merge dict and {type(right)}")
     if isinstance(left, set):
         if isinstance(right, set):
             t = select_type(type(left), type(right), set)
             return t(left | right)
+        raise NonMergeableTypesError(f"Cannot merge set and {type(right)}")
     # do not automatically merge lists
     # cue behaviour is to do an elementwise merge as implemented
     # in commented section below. we shall not do this and rely
@@ -75,7 +84,7 @@ def merge(left, right):
     #    raise TypeError()
     if left == right:
         return left
-    raise TypeError()
+    raise NonMergeableTypesError(f"Cannot merge {type(left)} and {type(right)} or values conflict")
 
 
 def merge_all(items):
