@@ -10,13 +10,13 @@ from avocado_config_gen import run
     ("files", "expected"),
     [
         (None, [0, 1]),
-        (["output1.yaml"], [0]),
-        (["output2.yaml"], [1]),
-        (["output1.yaml", "output2.yaml"], [0, 1]),
-        (["output1.yaml", "input_a.yaml"], [0, 1]),
-        (["output1.yaml", "input_2.yaml"], [0]),
-        (["input_2.yaml", "input_3.yaml"], [0]),
-        (["input_1.yaml", "input_c.yaml"], [0, 1]),
+        ({"output1.yaml"}, [0]),
+        ({"output2.yaml"}, [1]),
+        ({"output1.yaml", "output2.yaml"}, [0, 1]),
+        ({"output1.yaml", "input_a.yaml"}, [0, 1]),
+        ({"output1.yaml", "input_2.yaml"}, [0]),
+        ({"input_2.yaml", "input_3.yaml"}, [0]),
+        ({"input_1.yaml", "input_c.yaml"}, [0, 1]),
     ],
 )
 def test_run(files, expected):
@@ -42,4 +42,4 @@ def test_run(files, expected):
         kont.expect_call(data["output"], i, yaml=None).will_once(Return(None))
 
     with satisfied(kont, apply):
-        run(config, kont=kont, files=files and set(files), apply=apply)
+        run(config, kont=kont, files=files, apply=apply)
