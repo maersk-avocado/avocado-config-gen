@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "avocado-config-gen"
-version = "0.2.0"
+version = "0.2.1"
 description = ""
 authors = ["Edward George <edwardgeorge@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 "ruamel.yaml" = "^0.17.4"
 
 [tool.poetry.dev-dependencies]
