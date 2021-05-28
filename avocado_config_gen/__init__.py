@@ -55,7 +55,9 @@ def run(
     if files is None or config_changed:
         togen = config
     else:
-        togen = [i for i in config if (i["output"] in files) or (i["component"] in files) or (set(i["from"]) & files)]
+        togen = [
+            i for i in config if (i["output"] in files) or (i["components"] in files) or (set(i["from"]) & files)
+        ]
 
     for item in togen:
         output = item["output"]
