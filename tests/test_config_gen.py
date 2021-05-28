@@ -17,6 +17,9 @@ from avocado_config_gen import run
         ({"output1.yaml", "input_2.yaml"}, [0]),
         ({"input_2.yaml", "input_3.yaml"}, [0]),
         ({"input_1.yaml", "input_c.yaml"}, [0, 1]),
+        ({"foo.yaml"}, [0, 1]),
+        # unrelated files should trigger no applications:
+        ({"bar.yaml", "qux.yaml"}, []),
     ],
 )
 def test_run(files, expected):
