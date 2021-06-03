@@ -1,5 +1,5 @@
 import argparse
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Tuple
 
 from ruamel.yaml import YAML
 
@@ -26,13 +26,43 @@ def load_file(path: str, *, yaml=None):
         return yaml.load(f)
 
 
+def path_from_config(config) -> Tuple[Optional[str], dict]:
+    if isinstance(config, str):
+        return config, {}
+    elif isinstance(config, dict):
+        if "path" in config:
+            return config["path"], config
+    else:
+        raise TypeError(f"Unexpected config type: {type(config)}")
+    return None, config
+
+
+def combined_loader(config, *, yaml=None, file_loader=load_file):
+    yaml = yaml or create_yaml()
+    path, config = path_from_config(config)
+    if path is not None:
+        data = file_loader(path, yaml=yaml)
+    elif "value" in config:
+        data = config["value"]
+    elif "yaml" in config:
+        data = yaml.load(config["yaml"])
+
+    if "prefix_at" in config:
+        prefix_path = config["prefix_at"].split("/")
+        while prefix_path:
+            cur = prefix_path.pop()
+            data = {cur: data}
+
+    return data
+
+
 def dump_to_yaml(filename, data, *, yaml=None):
     yaml = yaml or create_yaml()
     with open(filename, "w") as f:
         yaml.dump(data, f, transform=prepend_notice)
 
 
-def apply_single(components, output: str, files: List[str], *, loader=load_file, yaml: Optional[YAML] = None):
+def apply_single(components, output: str, files: List[str], *, loader=combined_loader, yaml: Optional[YAML] = None):
     components = loader(components, yaml=yaml)
     data = [loader(p, yaml=yaml) for p in files]
     data = merge_all(data)
@@ -41,6 +71,10 @@ def apply_single(components, output: str, files: List[str], *, loader=load_file,
     step3 = template_list(components, step2)
     step4 = template_props(components, step3)
     return step4
+
+
+def all_files(from_) -> Set[str]:
+    return {p[0] for p in map(path_from_config, from_) if p[0] is not None}
 
 
 def run(
@@ -56,7 +90,9 @@ def run(
         togen = config
     else:
         togen = [
-            i for i in config if (i["output"] in files) or (i["components"] in files) or (set(i["from"]) & files)
+            i
+            for i in config
+            if (i["output"] in files) or (i["components"] in files) or (all_files(i["from"]) & files)
         ]
 
     for item in togen:
