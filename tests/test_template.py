@@ -91,3 +91,22 @@ def test_template_props(insert_val, expected):
     ]
     res = template_props(components, input)
     assert res == dict({"foo": 1, "bar": 2}, **expected)
+
+
+def test_template_props_list():
+    input = {
+        "__template_props": [
+            {"insert_key": "test_%(key)s", "insert_val": "%(val)s"},
+            {"insert_key": "extra_%(key)s", "insert_val": "extra: %(val)s"},
+        ]
+    }
+    components = [
+        {"key": "a", "val": "A"},
+        {"key": "b", "val": "B"},
+        {"key": "c", "val": "C"},
+    ]
+    res = template_props(components, input)
+    assert res == {
+        **{f"test_{i['key']}": i["val"] for i in components},
+        **{f"extra_{i['key']}": f"extra: {i['val']}" for i in components},
+    }

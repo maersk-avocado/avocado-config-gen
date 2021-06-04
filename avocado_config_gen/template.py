@@ -41,16 +41,31 @@ def template_props(items, obj):
         if not isinstance(obj, dict):
             return apply_children(obj, go)
         config = obj.pop("__template_props", None)
-        if config:
-            insert_key = config["insert_key"]
-            insert_val = config["insert_val"]
-            to_apply = filter_items(items, config)
+        cl = config_list(config)
+        if cl:
             return type(obj)(
-                {**obj, **{apply_template(i, insert_key): apply_template(i, insert_val) for i in to_apply}}
+                {
+                    **obj,
+                    **{
+                        apply_template(i, config["insert_key"]): apply_template(i, config["insert_val"])
+                        for config in cl
+                        for i in filter_items(items, config)
+                    },
+                }
             )
         return apply_children(obj, go)
 
     return go(obj)
+
+
+def config_list(config):
+    if not config:
+        return None
+    if isinstance(config, dict):
+        return [config]
+    if isinstance(config, list):
+        return config
+    raise TypeError(f"unexpected type {type(config)}")
 
 
 def filter_items(items, obj):
