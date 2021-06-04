@@ -50,8 +50,16 @@ def test_merge(input_a, input_b, expected):
             ],
         ),
         (Left({"foo": "bar"}), Left({"foo": "baz"})),
+        # without coalesce none, these fail:
+        (1, None),
+        (None, "foo"),
     ],
 )
 def test_merge_error(input_a, input_b):
     with pytest.raises(TypeError):
         merge(input_a, input_b)
+
+
+def test_merge_coallesce_none():
+    assert merge(1, None, coallesce_none=True) == 1
+    assert merge(None, 1, coallesce_none=True) == 1

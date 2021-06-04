@@ -30,7 +30,7 @@ def select_type(left, right, other=None):
     return other
 
 
-def merge(left, right):
+def merge(left, right, coallesce_none=False):
     x = 0
     if isinstance(left, Mergeable):
         res = left.merge(right)
@@ -87,6 +87,11 @@ def merge(left, right):
     #    raise TypeError()
     if left == right:
         return left
+    if coallesce_none:
+        if left is None:
+            return right
+        if right is None:
+            return left
     raise NonMergeableTypesError(f"Cannot merge {type(left)} and {type(right)} or values conflict")
 
 
