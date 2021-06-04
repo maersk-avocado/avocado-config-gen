@@ -61,6 +61,10 @@ class DAG(DefaultTags, Mergeable):
 
     @classmethod
     def from_assoclist(cls, key, values):
+        # encode key into the object id so that assoclists with different keys
+        # do not interact with each in unexpected ways, they'll be treated as
+        # separate nodes where the key value is identical.
+
         keys = [(key, v[key]) for v in values]
         successors = {k: {*keys[:i]} for i, k in enumerate(keys)}
         objsbykey = {(key, v[key]): v for v in values}
