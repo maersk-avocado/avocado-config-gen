@@ -30,9 +30,11 @@ class SetList(DefaultTags, Mergeable, set):
 
 
 class DAG(DefaultTags, Mergeable):
-    def __init__(self, objsbykey, successors):
+    def __init__(self, objsbykey, successors, prune_unreachable=None, required_keys=None):
         self.objsbykey = objsbykey
         self.successors = successors
+        self.prune_unreachable = prune_unreachable
+        self.required_keys = required_keys or {*[]}
 
     def merge(self, other):
         if not isinstance(other, DAG):
@@ -41,19 +43,36 @@ class DAG(DefaultTags, Mergeable):
 
         objsbykey = merge(self.objsbykey, other.objsbykey)
         successors = merge(self.successors, other.successors)
+        prune_unreachable = merge(self.prune_unreachable, other.prune_unreachable, coallesce_none=True)
+        required_keys = merge(self.required_keys, other.required_keys)
 
-        return t(objsbykey=objsbykey, successors=successors)
+        return t(
+            objsbykey=objsbykey,
+            successors=successors,
+            prune_unreachable=prune_unreachable,
+            required_keys=required_keys,
+        )
 
-    def finalize_to_list(self):
+    def finalize_to_list(self, prune_unreachable=None):
         keys = sorted(self.objsbykey.keys())
-        order, _ = toposort.order(keys, lambda k: sorted(self.successors.get(k, {*[]})))
+        order, visible = toposort.order(keys, lambda k: sorted(self.successors.get(k, {*[]})))
         order.reverse()
+        if prune_unreachable if prune_unreachable is not None else self.prune_unreachable:
+            accessible = {*[]}
+            for k in self.required_keys:
+                accessible.update(visible[k])
+            order = [k for k in order if k in accessible]
         return [self.objsbykey[k] for k in order]
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, DAG):
             return NotImplemented
-        return self.objsbykey == other.objsbykey and self.successors == other.successors
+        return (
+            self.objsbykey == other.objsbykey
+            and self.successors == other.successors
+            and self.prune_unreachable == other.prune_unreachable
+            and self.required_keys == other.required_keys
+        )
 
     @classmethod
     def to_yaml(cls, representer, node):
@@ -68,7 +87,9 @@ class DAG(DefaultTags, Mergeable):
         keys = [(key, v[key]) for v in values]
         successors = {k: {*keys[:i]} for i, k in enumerate(keys)}
         objsbykey = {(key, v[key]): v for v in values}
-        return cls(objsbykey=objsbykey, successors=successors)
+        # set required_keys to all for assoclists, but don't set prune_unreachable
+        # so if merged with something that sets prune_unreachable, then nothing is pruned...
+        return cls(objsbykey=objsbykey, successors=successors, required_keys={*keys})
 
 
 class NamedAssocList(DAG, DefaultTags):
