@@ -1,5 +1,6 @@
 import pytest
 
+from avocado_config_gen.tags import DAG
 from avocado_config_gen.template import apply_template, template_list, template_props, template_repeat
 
 
@@ -96,10 +97,11 @@ def test_template_props(insert_val, expected):
 def test_template_props_list():
     input = {
         "__template_props": [
-            {"insert_key": "test_%(key)s", "insert_val": "%(val)s"},
-            {"insert_key": "extra_%(key)s", "insert_val": "extra: %(val)s"},
+            {"insert_key": "test_%(key)s", "insert_val": "%(val)s", "name": "std"},
+            {"insert_key": "extra_%(key)s", "insert_val": "extra: %(val)s", "name": "extra"},
         ]
     }
+    input2 = input.copy()
     components = [
         {"key": "a", "val": "A"},
         {"key": "b", "val": "B"},
@@ -110,3 +112,7 @@ def test_template_props_list():
         **{f"test_{i['key']}": i["val"] for i in components},
         **{f"extra_{i['key']}": f"extra: {i['val']}" for i in components},
     }
+    # check with DAG
+    input_dag = {"__template_props": DAG.from_assoclist("name", input2["__template_props"])}
+    res2 = template_props(components, input_dag)
+    assert res == res2

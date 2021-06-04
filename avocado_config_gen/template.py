@@ -1,5 +1,6 @@
 import re
 
+from .tags import DAG
 from .traverse import apply_children
 
 
@@ -65,6 +66,8 @@ def config_list(config):
         return [config]
     if isinstance(config, list):
         return config
+    if isinstance(config, DAG):
+        return config.finalize_to_list()
     raise TypeError(f"unexpected type {type(config)}")
 
 
