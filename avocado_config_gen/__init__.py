@@ -47,6 +47,11 @@ def combined_loader(config, *, yaml=None, file_loader=load_file):
     elif "yaml" in config:
         data = yaml.load(config["yaml"])
 
+    if "extract_from" in config:
+        extract_path = config["extract_from"].split("/")
+        for key in extract_path:
+            data = data[key]
+
     if "prefix_at" in config:
         prefix_path = config["prefix_at"].split("/")
         while prefix_path:

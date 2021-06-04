@@ -61,6 +61,10 @@ def test_run(files, expected):
         ({"value": ["test"]}, ["test"]),
         ({"value": ["test"], "prefix_at": "a"}, {"a": ["test"]}),
         ({"yaml": '"key": 3\n'}, {"key": 3}),
+        (
+            {"value": {"a": {"b": {"c": 999}}}, "extract_from": "a/b/c", "prefix_at": "hello/world"},
+            {"hello": {"world": 999}},
+        ),
     ],
 )
 def test_combined_loader(config, expected):
