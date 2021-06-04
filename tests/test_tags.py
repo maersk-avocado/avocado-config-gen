@@ -9,10 +9,10 @@ def _to_named_list(ls, key="name"):
     return [{key: i} for i in ls]
 
 
-def test_assoc_list():
-    a = tags.AssocList.from_assoclist(0, "name", _to_named_list([1, 2, 3, 4]))
-    b = tags.AssocList.from_assoclist(1, "name", _to_named_list([1, 4, 5]))
-    c = tags.AssocList.from_assoclist(2, "name", _to_named_list([0, 3, 5, 9]))
+def test_dag_from_assoclist():
+    a = tags.DAG.from_assoclist("name", _to_named_list([1, 2, 3, 4]))
+    b = tags.DAG.from_assoclist("name", _to_named_list([1, 4, 5]))
+    c = tags.DAG.from_assoclist("name", _to_named_list([0, 3, 5, 9]))
     x = merge.merge_all([a, b, c])
     assert x.finalize_to_list() == _to_named_list([0, 1, 2, 3, 4, 5, 9])
     # order should not matter...
@@ -33,12 +33,13 @@ def test_assoc_list():
     assert yaml.load(xbuf.getvalue()) == _to_named_list([0, 1, 2, 3, 4, 5, 9])
 
 
-def test_assoc_list_cycle():
-    a = tags.AssocList.from_assoclist(0, "name", _to_named_list([1, 2]))
-    b = tags.AssocList.from_assoclist(1, "name", _to_named_list([2, 1]))
+def test_dag_from_assoclist_cycle():
+    a = tags.DAG.from_assoclist("name", _to_named_list([1, 2]))
+    b = tags.DAG.from_assoclist("name", _to_named_list([2, 1]))
     c = merge.merge(a, b)
     with pytest.raises(ValueError):
-        c.finalize_to_list()
+        r = c.finalize_to_list()
+        print("should not have returned:", r)
 
 
 def test_named_assoc_list_deser():
@@ -51,7 +52,6 @@ def test_named_assoc_list_deser():
     """
 
     d = y.load(input)
-    assert d.key == "name"
     assert d.finalize_to_list() == _to_named_list([1, 2, 3])
 
 
@@ -65,5 +65,4 @@ def test_id_assoc_list_deser():
     """
 
     d = y.load(input)
-    assert d.key == "id"
     assert d.finalize_to_list() == _to_named_list([1, 2, 3], key="id")
