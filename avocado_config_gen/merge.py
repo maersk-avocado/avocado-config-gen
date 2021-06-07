@@ -58,10 +58,10 @@ def merge(left, right, coallesce_none=False):
         if isinstance(right, dict):
             t = select_type(type(left), type(right), dict)
             return t(
-                {
-                    **{k: (merge(left[k], right[k]) if k in right else left[k]) for k in left},
-                    **{k: right[k] for k in right if k not in left},
-                }
+                (
+                    *((k, (merge(left[k], right[k])) if k in right else left[k]) for k in left),
+                    *((k, right[k]) for k in right if k not in left),
+                )
             )
         raise NonMergeableTypesError(f"Cannot merge dict and {type(right)}")
     if isinstance(left, set):
