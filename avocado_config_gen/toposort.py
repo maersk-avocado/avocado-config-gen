@@ -37,7 +37,7 @@ def do_toposort(node, config):
             raise KeyError(f"Key {key} missing in {node.keys()}")
         if isinstance(needed, str):
             return [needed]
-        return needed or []
+        return sorted(needed) if needed else []
 
     def output_node(key):
         n = node[key]
@@ -53,9 +53,9 @@ def do_toposort(node, config):
             return key in required or isvisible(key)
         return True
 
-    sorted, visible = order(node.keys(), successors)
-    sorted.reverse()
-    return [output_node(i) for i in sorted if keep_node(i, visible)]
+    sorted_nodes, visible = order(node.keys(), successors)
+    sorted_nodes.reverse()
+    return [output_node(i) for i in sorted_nodes if keep_node(i, visible)]
 
 
 def apply_toposort(obj):
