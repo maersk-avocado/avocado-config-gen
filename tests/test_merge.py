@@ -1,5 +1,6 @@
 import pytest
 
+from avocado_config_gen import create_yaml
 from avocado_config_gen.merge import Mergeable, merge
 
 
@@ -63,3 +64,25 @@ def test_merge_error(input_a, input_b):
 def test_merge_coallesce_none():
     assert merge(1, None, coallesce_none=True) == 1
     assert merge(None, 1, coallesce_none=True) == 1
+
+
+def test_merge_complex_keys():
+    yaml = create_yaml()
+    a = yaml.load(
+        """
+    ?
+      key: hello
+    : {"foo": 1}
+    """
+    )
+    b = yaml.load(
+        """
+    ?
+      key: hello
+    : {"bar": 2}
+    """
+    )
+    r = merge(a, b)
+    assert len(r) == 1
+    assert list(r.values())[0] == {"foo": 1, "bar": 2}
+    assert list(r.keys())[0] == {"key": "hello"}
