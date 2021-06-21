@@ -1,4 +1,11 @@
 import abc
+from collections import abc as colabc
+
+SET_TYPES = (
+    set,
+    colabc.MutableSet,
+    colabc.Set,
+)
 
 
 class NonCommutativeMergeError(TypeError):
@@ -64,8 +71,8 @@ def merge(left, right, coallesce_none=False):
                 )
             )
         raise NonMergeableTypesError(f"Cannot merge dict and {type(right)}")
-    if isinstance(left, set):
-        if isinstance(right, set):
+    if isinstance(left, SET_TYPES):
+        if isinstance(right, SET_TYPES):
             t = select_type(type(left), type(right), set)
             return t(left | right)
         raise NonMergeableTypesError(f"Cannot merge set and {type(right)}")

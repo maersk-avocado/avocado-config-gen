@@ -1,5 +1,5 @@
 from . import toposort
-from .merge import Mergeable, merge, select_type
+from .merge import SET_TYPES, Mergeable, merge, select_type
 
 
 class DefaultTags:
@@ -24,7 +24,7 @@ class SetList(DefaultTags, Mergeable, set):
         return representer.represent_list(sorted(node))
 
     def merge(self, other):
-        if not isinstance(other, set):
+        if not isinstance(other, SET_TYPES):
             return NotImplemented
         return SetList(self | other)
 
