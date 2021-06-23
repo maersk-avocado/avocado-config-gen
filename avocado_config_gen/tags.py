@@ -112,6 +112,11 @@ class MergeMaps(DefaultTags, dict):
     yaml_tag = "!mergemap"
 
     @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_dict(dict(node))
+
+    @classmethod
     def from_yaml(cls, constructor, node):
         maps = constructor.construct_sequence(node, deep=True)
-        return cls({k: v for i in maps for k, v in i.items()})
+        # just return plain dict, rather than subclass
+        return {k: v for i in maps for k, v in i.items()}

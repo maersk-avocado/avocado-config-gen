@@ -83,3 +83,8 @@ def test_mergemap():
     )
     r = merge.merge(d, {"a": 2, "e": 0})
     assert r == {"a": 2, "b": 3, "c": 3, "d": 4, "e": 0}
+
+    # test roundtrip to yaml
+    b = io.StringIO()
+    y.dump(d, b)
+    assert y.load(b.getvalue()) == {"a": 2, "b": 3, "c": 3, "d": 4}
