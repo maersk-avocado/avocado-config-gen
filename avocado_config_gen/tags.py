@@ -106,3 +106,12 @@ class IdAssocList(DAG, DefaultTags):
     @classmethod
     def from_yaml(cls, constructor, node):
         return cls.from_assoclist("id", constructor.construct_sequence(node, deep=True))
+
+
+class MergeMaps(DefaultTags, dict):
+    yaml_tag = "!mergemap"
+
+    @classmethod
+    def from_yaml(cls, constructor, node):
+        maps = constructor.construct_sequence(node, deep=True)
+        return cls({k: v for i in maps for k, v in i.items()})

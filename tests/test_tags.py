@@ -66,3 +66,20 @@ def test_id_assoc_list_deser():
 
     d = y.load(input)
     assert d.finalize_to_list() == _to_named_list([1, 2, 3], key="id")
+
+
+def test_mergemap():
+    y = create_yaml()
+    d = y.load(
+        """
+    !mergemap
+    - a: 1
+      b: 2
+      c: 3
+    - a: 2
+      b: 3
+      d: 4
+    """
+    )
+    r = merge.merge(d, {"a": 2, "e": 0})
+    assert r == {"a": 2, "b": 3, "c": 3, "d": 4, "e": 0}
