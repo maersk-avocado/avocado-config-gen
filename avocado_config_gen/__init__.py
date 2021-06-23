@@ -13,6 +13,7 @@ def create_yaml():
     yaml = YAML()
     for cls in DefaultTags._subclasses:
         yaml.register_class(cls)
+    yaml.Representer.ignore_aliases = lambda *a, **k: True
     return yaml
 
 
