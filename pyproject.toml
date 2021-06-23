@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "avocado-config-gen"
-version = "0.7.0"
+version = "0.7.1"
 description = ""
 authors = ["Edward George <edwardgeorge@gmail.com>"]
 
