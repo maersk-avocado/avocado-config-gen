@@ -120,3 +120,21 @@ class MergeMaps(DefaultTags, dict):
         maps = constructor.construct_sequence(node, deep=True)
         # just return plain dict, rather than subclass
         return {k: v for i in maps for k, v in i.items()}
+
+
+class StrSet(DefaultTags, Mergeable, set):
+    yaml_tag = "!stringset"
+
+    @classmethod
+    def from_yaml(cls, constructor, node):
+        return cls(constructor.construct_sequence(node))
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        x = [representer.represent_str(i).value for i in node]
+        return representer.represent_str("\n".join(x))
+
+    def merge(self, other):
+        if not isinstance(other, SET_TYPES):
+            return NotImplemented
+        return StrSet(self | other)

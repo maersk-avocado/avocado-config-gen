@@ -88,3 +88,20 @@ def test_mergemap():
     b = io.StringIO()
     y.dump(d, b)
     assert y.load(b.getvalue()) == {"a": 2, "b": 3, "c": 3, "d": 4}
+
+
+def test_strset():
+    y = create_yaml()
+    d = y.load(
+        """
+    !stringset
+    - hello
+    - world
+    """
+    )
+    r = merge.merge(d, {"foo", "bar"})
+    b = io.StringIO()
+    y.dump(r, b)
+    r2 = y.load(b.getvalue())
+    assert isinstance(r2, str)
+    assert set(r2.splitlines()) == {"hello", "world", "foo", "bar"}
