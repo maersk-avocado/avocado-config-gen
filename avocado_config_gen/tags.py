@@ -132,7 +132,7 @@ class StrSet(DefaultTags, Mergeable, set):
     @classmethod
     def to_yaml(cls, representer, node):
         x = [representer.represent_str(i).value for i in node]
-        return representer.represent_scalar("tag:yaml.org,2002:str", "\n".join(x), style="|")
+        return representer.represent_scalar("tag:yaml.org,2002:str", "\n".join(x), style="|" if len(x) > 1 else None)
 
     def merge(self, other):
         if not isinstance(other, SET_TYPES):
